@@ -1,0 +1,10 @@
+{
+  "name": "postar-quatro-takes",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sistema de postagem para Quatro Takes",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  }
+}

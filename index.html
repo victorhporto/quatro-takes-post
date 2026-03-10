@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Postar - Quatro Takes</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tiny.cloud/1/zr1j6ijq3aux8xakuaaz97xfmznzt9uif06yk7nobb7og4q3/tinymce/8/tinymce.min.js" referrerpolicy="origin" crossorigin="anonymous"></script>
+    
+    <!-- Fontes do Quatro Takes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial Nova', Arial, Helvetica, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px 0;
+            color: #333;
+        }
+        
+        .post-form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header-section {
+            text-align: center;
+            margin-bottom: 40px;
+            background: #ba3b3b;
+            margin: -20px -20px 40px -20px;
+            padding: 30px 20px;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .post-form-container h1 {
+            color: #f0eadd;
+            text-align: center;
+            margin-bottom: 10px;
+            font-family: 'League Spartan', Arial, Helvetica, sans-serif;
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        
+        .post-form {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e1e5e9;
+            border-top: 4px solid #ba3b3b;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-family: 'League Spartan', Arial, Helvetica, sans-serif;
+            font-weight: bold;
+            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-family: 'Arial Nova', Arial, Helvetica, sans-serif;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            background: #fff;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #ba3b3b;
+            box-shadow: 0 0 0 3px rgba(186, 59, 59, 0.1);
+        }
+        
+        .submit-button {
+            width: 100%;
+            background: #ba3b3b;
+            color: #f0eadd;
+            border: none;
+            padding: 16px 24px;
+            border-radius: 8px;
+            font-family: 'League Spartan', Arial, Helvetica, sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        
+        .submit-button:hover:not(:disabled) {
+            background: #8b2a2a;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(186, 59, 59, 0.3);
+        }
+        
+        .submit-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .message.success {
+            background-color: rgba(34, 197, 94, 0.1);
+            color: #15803d;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            font-family: 'Arial Nova', Arial, Helvetica, sans-serif;
+        }
+        
+        .message.error {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            font-family: 'Arial Nova', Arial, Helvetica, sans-serif;
+        }
+
+        /* Estilo para o TinyMCE */
+        .tox-tinymce {
+            border-radius: 8px !important;
+            border: 2px solid #e1e5e9 !important;
+            margin-top: 8px !important;
+        }
+
+        .tox-tinymce:focus-within {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+        }
+
+        .tox-tinymce .tox-edit-area__iframe {
+            border-radius: 0 0 8px 8px !important;
+        }
+
+        .tox-tinymce .tox-toolbar {
+            border-radius: 8px 8px 0 0 !important;
+        }
+
+        /* Estilos para o Dialog */
+        .dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .dialog-content {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 800px;
+            width: 100%;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .dialog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 2px solid #e1e5e9;
+            background: #ba3b3b;
+        }
+
+        .dialog-header h2 {
+            margin: 0;
+            color: #f0eadd;
+            font-family: 'League Spartan', Arial, Helvetica, sans-serif;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .dialog-close {
+            background: transparent;
+            border: none;
+            color: #f0eadd;
+            font-size: 32px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            transition: transform 0.2s ease;
+        }
+
+        .dialog-close:hover {
+            transform: rotate(90deg);
+        }
+
+        .dialog-body {
+            padding: 20px 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .critics-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .critic-item {
+            padding: 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #fff;
+        }
+
+        .critic-item:hover {
+            border-color: #ba3b3b;
+            background: #fef2f2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(186, 59, 59, 0.15);
+        }
+
+        .critic-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            gap: 16px;
+        }
+
+        .critic-item-header h3 {
+            margin: 0;
+            font-family: 'League Spartan', Arial, Helvetica, sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #111;
+            flex: 1;
+        }
+
+        .critic-date {
+            font-size: 0.875rem;
+            color: #6b7280;
+            white-space: nowrap;
+        }
+
+        .critic-item-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .critic-meta {
+            font-size: 0.875rem;
+            color: #4b5563;
+            padding: 4px 8px;
+            background: #f3f4f6;
+            border-radius: 4px;
+        }
+
+        /* Story Dialog */
+        .story-dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            padding: 20px;
+        }
+
+        .story-download-btn {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            padding: 12px 24px;
+            background: #111827;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-family: 'League Spartan', Arial, sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            z-index: 1002;
+        }
+
+        .story-download-btn:hover {
+            background: #1f2937;
+        }
+
+        .story-dialog-wrapper {
+            overflow: auto;
+            transform: scale(0.5);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .story-container {
+            width: 1080px;
+            height: 1920px;
+            background: #C43034;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 60px 50px 80px;
+            box-sizing: border-box;
+        }
+
+        h1.story-header {
+            color: #fff;
+            font-family: 'League Spartan', Arial, sans-serif;
+            font-size: 68px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 100px;
+            margin-top: 100px;
+        }
+
+        .story-ticket {
+            width: 100%;
+            max-width: 960px;
+            min-height: 280px;
+            background: url('assets/ticket.png') center/contain no-repeat;
+            background-size: 100% 100%;
+            border-radius: 12px;
+            padding: 40px 50px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .story-ticket-image {
+            width: 260px;
+            height: 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .story-ticket-image img {
+            margin-left: 20px;
+            width: 150px;
+            height: 150px;
+            min-width: 120px;
+            border-radius: 20px;
+            background: #e8e0d0;
+        }
+
+        .story-ticket-content {
+            flex: 1;
+            align-self: baseline;
+        }
+
+        .story-ticket-title-value {
+            color: #ba3b3b;
+            font-weight: bold;
+            font-family: 'League Spartan', Arial, sans-serif;
+            font-size: 22px;
+            line-height: 1.4;
+            text-align: center;
+            margin-top: 26px;
+        }
+
+        .story-excerpt {
+            width: 100%;
+            max-width: 960px;
+            height: 400px;
+            background: #FDF4E3;
+            border-radius: 16px;
+            padding: 30px 40px;
+            color: #333;
+            font-family: 'Arial Nova', Arial, sans-serif;
+            font-size: 28px;
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        .story-excerpt-text {
+            display: -webkit-box;
+            -webkit-line-clamp: 8;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-break: break-word;
+        }
+
+        .story-footer {
+            width: 100%;
+            max-width: 960px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 40px;
+            justify-content: space-evenly;
+        }
+
+        .story-author-photo {
+            width: 180px;
+            height: 180px;
+            min-width: 180px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #e8e0d0;
+            border: 3px solid #FDF4E3;
+        }
+
+        .story-author-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            text-align: center;
+        }
+
+        .story-author-label {
+            color: #FDF4E3;
+            font-family: 'Arial Nova', Arial, sans-serif;
+            font-size: 20px;
+        }
+
+        .story-author-name {
+            color: #fff;
+            font-family: 'League Spartan', Arial, sans-serif;
+            font-size: 43px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        
+        // Configuração do Supabase
+        const supabaseUrl = 'https://iamhmsrwbaknefykxpsq.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhbWhtc3J3YmFrbmVmeWt4cHNxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMDE1NDAsImV4cCI6MjA3MDc3NzU0MH0.s93-_j9HsYoP7MepVaAAxqLyvCfhK3wB-3xJ6hu30Sk';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        // API Key do The Movie Database - obtenha em https://www.themoviedb.org/settings/api
+        const TMDB_API_KEY = '2fd2b3e1a34b6b58aae0c6a0e870512d';
+
+        let genreListCache = null;
+        const fetchGenreList = async () => {
+            if (genreListCache) return genreListCache;
+            try {
+                const res = await fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${TMDB_API_KEY}&language=pt-BR`);
+                const data = await res.json();
+                genreListCache = data.genres || [];
+                return genreListCache;
+            } catch {
+                return [];
+            }
+        };
+
+        const getLocalDateTimeInputValue = (date = new Date()) => {
+            const pad = (num) => String(num).padStart(2, '0');
+            const year = date.getFullYear();
+            const month = pad(date.getMonth() + 1);
+            const day = pad(date.getDate());
+            const hours = pad(date.getHours());
+            const minutes = pad(date.getMinutes());
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        };
+
+        const formatLocalDateTimeForSupabase = (localDateTime) => {
+            if (!localDateTime) return null;
+
+            const [datePart, rawTimePart = '00:00'] = localDateTime.split('T');
+            const normalizedTime = rawTimePart.length === 5 ? `${rawTimePart}:00` : rawTimePart;
+
+            const date = new Date(localDateTime);
+            const offsetMinutes = -date.getTimezoneOffset();
+            const sign = offsetMinutes >= 0 ? '+' : '-';
+            const absOffset = Math.abs(offsetMinutes);
+            const offsetHours = String(Math.floor(absOffset / 60)).padStart(2, '0');
+            const offsetMins = String(absOffset % 60).padStart(2, '0');
+
+            return `${datePart}T${normalizedTime}${sign}${offsetHours}:${offsetMins}`;
+        };
+
+        function PostForm() {
+            const [formData, setFormData] = useState({
+                title: '',
+                text: '',
+                writer_id: '',
+                rate: '',
+                tag: '',
+                font_id: '',
+                seen_at: '',
+                convite_id: ''
+            });
+
+            const [postType, setPostType] = useState('critics'); // 'critics' ou 'news'
+            
+            const [writers, setWriters] = useState([]);
+            const [tags, setTags] = useState([]);
+            const [fonts, setFonts] = useState([]);
+            const [loading, setLoading] = useState(false);
+            const [message, setMessage] = useState('');
+            const [lastCreatedCritic, setLastCreatedCritic] = useState(null);
+            const [copyStatus, setCopyStatus] = useState('');
+            const [showCriticsDialog, setShowCriticsDialog] = useState(false);
+            const [showStoryDialog, setShowStoryDialog] = useState(false);
+            const [criticsList, setCriticsList] = useState([]);
+            const [loadingCritics, setLoadingCritics] = useState(false);
+            const [editingId, setEditingId] = useState(null);
+            const storyCanvasRef = useRef(null);
+            const [movieInfo, setMovieInfo] = useState(null);
+
+            // Buscar diretor e pôster do filme na TMDB
+            const fetchMovieInfo = async (movieTitle) => {
+                if (!movieTitle || !TMDB_API_KEY || TMDB_API_KEY === 'SUA_API_KEY_AQUI') return null;
+                try {
+                    const searchRes = await fetch(
+                        `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(movieTitle)}&api_key=${TMDB_API_KEY}&language=pt-BR`
+                    );
+                    const searchData = await searchRes.json();
+                    const firstResult = searchData.results?.[0];
+                    if (!firstResult?.id) return null;
+                    const movieId = firstResult.id;
+                    const posterPath = firstResult.poster_path;
+                    const posterUrl = posterPath ? `https://image.tmdb.org/t/p/w342${posterPath}` : null;
+                    const creditsRes = await fetch(
+                        `https://api.themoviedb.org/3/movie/${movieId}/credits?api_key=${TMDB_API_KEY}`
+                    );
+                    const creditsData = await creditsRes.json();
+                    const crew = creditsData.crew || [];
+                    let directors = crew.filter((c) => (c.job || '').toLowerCase() === 'director').map((c) => c.name);
+                    if (directors.length === 0) {
+                        const directingCrew = crew.filter((c) => {
+                            const dept = (c.department || c.known_for_department || '').toLowerCase();
+                            const j = (c.job || '').toLowerCase();
+                            return dept === 'directing' && !j.includes('assistant') && !j.includes('second unit');
+                        });
+                        directors = directingCrew.length ? [directingCrew[0].name] : [];
+                    }
+                    const uniqueDirectors = [...new Set(directors)];
+                    const director = uniqueDirectors.length ? uniqueDirectors.join(', ') : null;
+                    const genreIds = firstResult.genre_ids || [];
+                    const genres = await fetchGenreList();
+                    const genreNames = genreIds.map((id) => genres.find((g) => g.id === id)?.name).filter(Boolean);
+                    const genre = genreNames.length ? genreNames.slice(0, 3).join(', ') : null;
+                    return { director, posterUrl, genre };
+                } catch (err) {
+                    console.warn('TMDB: erro ao buscar dados do filme', err);
+                    return null;
+                }
+            };
+
+            // Carregar writers, tags e fontes do Supabase
+            useEffect(() => {
+                const fetchData = async () => {
+                    try {
+                        // Buscar writers
+                        const { data: writersData, error: writersError } = await supabase
+                            .from('writers')
+                            .select('id, name, photo_url')
+                            .order('name');
+                        
+                        if (writersError) throw writersError;
+                        setWriters(writersData || []);
+
+                        // Buscar tags
+                        const { data: tagsData, error: tagsError } = await supabase
+                            .from('tags')
+                            .select('id, name')
+                            .order('name');
+                        
+                        if (tagsError) throw tagsError;
+                        setTags(tagsData || []);
+
+                        // Buscar fontes
+                        const { data: fontsData, error: fontsError } = await supabase
+                            .from('fonts')
+                            .select('id, name')
+                            .order('name');
+                        
+                        if (fontsError) throw fontsError;
+                        setFonts(fontsData || []);
+
+                    } catch (error) {
+                        console.error('Erro ao carregar dados:', error);
+                        setMessage('Erro ao carregar dados iniciais');
+                    }
+                };
+
+                fetchData();
+            }, []);
+
+            // Inicializar TinyMCE
+            useEffect(() => {
+                if (window.tinymce) {
+                    window.tinymce.init({
+                        selector: '#text',
+                        plugins: [
+                            'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'link', 'lists', 'media', 'searchreplace', 'table', 'visualblocks', 'wordcount'
+                        ],
+                        toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+                        tinycomments_mode: 'embedded',
+                        tinycomments_author: 'Quatro Takes',
+                        mergetags_list: [
+                            { value: 'First.Name', title: 'First Name' },
+                            { value: 'Email', title: 'Email' },
+                        ],
+                        ai_request: (request, respondWith) => respondWith.string(() => Promise.reject('See docs to implement AI Assistant')),
+                        uploadcare_public_key: '6541cee65962e33ff616',
+                        height: 400,
+                        menubar: false,
+                        branding: false,
+                        language: 'pt_BR',
+                        content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px }',
+                        setup: function (editor) {
+                            editor.on('change', function () {
+                                const content = editor.getContent();
+                                setFormData(prev => ({
+                                    ...prev,
+                                    text: content
+                                }));
+                            });
+                        }
+                    });
+                }
+            }, []);
+
+            const handleInputChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({
+                    ...prev,
+                    [name]: value
+                }));
+            };
+
+            const handlePostTypeChange = (e) => {
+                const newPostType = e.target.value;
+                setPostType(newPostType);
+                
+                // Limpar campos específicos quando mudar o tipo
+                setFormData(prev => ({
+                    ...prev,
+                    rate: '',
+                    tag: '',
+                    font_id: '',
+                    seen_at: '',
+                    convite_id: ''
+                }));
+                setLastCreatedCritic(null);
+                setCopyStatus('');
+                setEditingId(null);
+            };
+
+            // Buscar lista de críticas
+            const fetchCritics = async () => {
+                setLoadingCritics(true);
+                try {
+                    const { data, error } = await supabase
+                        .from('critics')
+                        .select('id, title, created_at, writer_id, rate, tag')
+                        .order('created_at', { ascending: false })
+                        .limit(100);
+                    
+                    if (error) throw error;
+                    setCriticsList(data || []);
+                } catch (error) {
+                    console.error('Erro ao buscar críticas:', error);
+                    setMessage(`Erro ao buscar críticas: ${error.message}`);
+                } finally {
+                    setLoadingCritics(false);
+                }
+            };
+
+            // Abrir dialog e carregar críticas
+            const handleOpenCriticsDialog = async () => {
+                setShowCriticsDialog(true);
+                await fetchCritics();
+            };
+
+            // Selecionar crítica para editar
+            const handleSelectCritic = async (criticId) => {
+                try {
+                    const { data, error } = await supabase
+                        .from('critics')
+                        .select('*')
+                        .eq('id', criticId)
+                        .single();
+                    
+                    if (error) throw error;
+                    
+                    if (data) {
+                        // Converter rate de volta para escala 1-5 (está salvo como 2-10)
+                        const rateInScale = data.rate ? data.rate / 2 : '';
+                        
+                        // Converter seen_at para formato local se existir
+                        let seenAtLocal = '';
+                        if (data.seen_at) {
+                            const date = new Date(data.seen_at);
+                            seenAtLocal = getLocalDateTimeInputValue(date);
+                        }
+                        
+                        // Preencher formulário
+                        setFormData({
+                            title: data.title || '',
+                            text: data.text || '',
+                            writer_id: data.writer_id ? String(data.writer_id) : '',
+                            rate: rateInScale ? String(rateInScale) : '',
+                            tag: data.tag ? String(data.tag) : '',
+                            font_id: '',
+                            seen_at: seenAtLocal,
+                            convite_id: ''
+                        });
+                        
+                        // Preencher TinyMCE
+                        if (window.tinymce && window.tinymce.get('text')) {
+                            window.tinymce.get('text').setContent(data.text || '');
+                        }
+                        
+                        // Definir como edição
+                        setEditingId(criticId);
+                        setPostType('critics');
+                        
+                        // Fechar dialog
+                        setShowCriticsDialog(false);
+                        setMessage('');
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar crítica:', error);
+                    setMessage(`Erro ao carregar crítica: ${error.message}`);
+                }
+            };
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                setMessage('');
+
+                try {
+                    // Validações básicas
+                    if (!formData.title.trim()) {
+                        throw new Error('Título é obrigatório');
+                    }
+                    
+                    // Validar conteúdo do TinyMCE
+                    let htmlContent = formData.text;
+                    if (window.tinymce && window.tinymce.get('text')) {
+                        htmlContent = window.tinymce.get('text').getContent();
+                    }
+                    
+                    if (!htmlContent || htmlContent.trim() === '' || htmlContent.trim() === '<p></p>') {
+                        throw new Error('Conteúdo é obrigatório');
+                    }
+                    // Validações específicas por tipo
+                    if (postType === 'critics') {
+                        if (!formData.writer_id) {
+                            throw new Error('Selecione um escritor');
+                        }
+                        if (!formData.rate || formData.rate < 1 || formData.rate > 5) {
+                            throw new Error('Nota deve ser entre 1 e 5');
+                        }
+                        if (!formData.tag) {
+                            throw new Error('Selecione uma tag');
+                        }
+                    } else if (postType === 'news') {
+                        if (!formData.font_id) {
+                            throw new Error('Selecione uma fonte');
+                        }
+                    }
+
+                    // Preparar dados para inserção/atualização
+                    const updateData = {
+                        title: formData.title.trim(),
+                        text: htmlContent, // HTML formatado do TinyMCE
+                    };
+
+                    // Adicionar campos específicos por tipo
+                    if (postType === 'critics') {
+                        updateData.writer_id = parseInt(formData.writer_id);
+                        updateData.rate = parseFloat(formData.rate) * 2;
+                        updateData.tag = parseInt(formData.tag);
+                    } else if (postType === 'news') {
+                        updateData.font_id = parseInt(formData.font_id);
+                    }
+
+                    console.log('📝 HTML capturado do TinyMCE:', htmlContent);
+
+                    if (postType === 'critics') {
+                        const seenAt = formatLocalDateTimeForSupabase(formData.seen_at);
+                        // Se estiver editando, sempre enviar seen_at (mesmo que null para remover)
+                        if (editingId) {
+                            updateData.seen_at = seenAt;
+                        } else if (seenAt) {
+                            // Se estiver criando, só enviar se tiver valor
+                            updateData.seen_at = seenAt;
+                        }
+                    }
+
+                    let data, error;
+
+                    // Verificar se é edição ou criação
+                    if (editingId && postType === 'critics') {
+                        // Atualizar crítica existente
+                        const { data: updateResult, error: updateError } = await supabase
+                            .from('critics')
+                            .update(updateData)
+                            .eq('id', editingId)
+                            .select();
+
+                        data = updateResult;
+                        error = updateError;
+
+                        if (!error) {
+                            setMessage('Crítica editada com sucesso!');
+                        }
+                    } else {
+                        // Criar nova postagem
+                        const { data: insertResult, error: insertError } = await supabase
+                            .from(postType) // 'critics' ou 'news'
+                            .insert([updateData])
+                            .select();
+
+                        data = insertResult;
+                        error = insertError;
+
+                        if (!error) {
+                            setMessage(`${postType === 'critics' ? 'Crítica' : 'Novidade'} criada com sucesso!`);
+                        }
+                    }
+
+                    if (error) throw error;
+                    
+                    if (postType === 'critics' && Array.isArray(data) && data.length > 0) {
+                        const critic = data[0];
+                        if (critic && critic.id) {
+                            const writer = writers.find(w => w.id === parseInt(formData.writer_id));
+                            const stripHtml = (html) => {
+                                if (!html) return '';
+                                const tmp = document.createElement('div');
+                                tmp.innerHTML = html;
+                                return (tmp.textContent || tmp.innerText || '').trim();
+                            };
+                            const excerpt = stripHtml(critic.text || htmlContent);
+                            const conviteFont = fonts.find(f => f.id === parseInt(formData.convite_id));
+                            setLastCreatedCritic({
+                                title: critic.title,
+                                url: `https://quatrotakes.com/criticas?critica=${critic.id}`,
+                                text: excerpt,
+                                authorName: writer ? writer.name : '',
+                                authorPhotoUrl: writer ? writer.photo_url : '',
+                                convite: conviteFont ? conviteFont.name : '',
+                                rate: critic.rate != null ? critic.rate / 2 : null
+                            });
+                            setCopyStatus('');
+                        }
+                    } else {
+                        setLastCreatedCritic(null);
+                        setCopyStatus('');
+                    }
+
+                    // Limpar formulário e estado de edição
+                    setFormData({
+                        title: '',
+                        text: '',
+                        writer_id: '',
+                        rate: '',
+                        tag: '',
+                        font_id: '',
+                        seen_at: '',
+                        convite_id: ''
+                    });
+                    setEditingId(null);
+
+                    // Limpar TinyMCE
+                    if (window.tinymce && window.tinymce.get('text')) {
+                        window.tinymce.get('text').setContent('');
+                    }
+
+                } catch (error) {
+                    console.error('Erro ao criar postagem:', error);
+                    setMessage(`Erro: ${error.message}`);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const loadImage = (src, crossOrigin = false) => {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    if (crossOrigin) img.crossOrigin = 'anonymous';
+                    img.onload = () => resolve(img);
+                    img.onerror = () => resolve(null);
+                    img.src = src;
+                });
+            };
+
+            const wrapText = (ctx, text, maxWidth) => {
+                const words = text.split(/\s+/);
+                const lines = [];
+                let currentLine = '';
+                for (const word of words) {
+                    const test = currentLine ? currentLine + ' ' + word : word;
+                    const metrics = ctx.measureText(test);
+                    if (metrics.width > maxWidth && currentLine) {
+                        lines.push(currentLine);
+                        currentLine = word;
+                    } else {
+                        currentLine = test;
+                    }
+                }
+                if (currentLine) lines.push(currentLine);
+                return lines;
+            };
+
+            const drawStoryToCanvas = async (canvas, data) => {
+                if (!canvas || !data) return;
+                await document.fonts.ready;
+                const ctx = canvas.getContext('2d');
+                const W = 1080;
+                const H = 1920;
+                canvas.width = W;
+                canvas.height = H;
+
+                ctx.fillStyle = '#c13d3d';
+                ctx.fillRect(0, 0, W, H);
+
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 68px "League Spartan", Arial, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('CRÍTICA', W / 2, 160);
+
+                const ticketImg = await loadImage('assets/ticket.png');
+                const ticketX = 60;
+                const ticketY = 220;
+                const ticketW = 960;
+                const ticketH = 340;
+                if (ticketImg) {
+                    ctx.drawImage(ticketImg, ticketX, ticketY, ticketW, ticketH);
+                } else {
+                    ctx.fillStyle = '#f0e6d6';
+                    roundRect(ctx, ticketX, ticketY, ticketW, ticketH, 12);
+                    ctx.fill();
+                }
+
+                const leftSectionW = 340;
+                const leftImgW = 120;
+                const leftImgH = 160;
+                const leftImgX = ticketX + (leftSectionW - leftImgW) / 2;
+                const leftImgY = ticketY + (ticketH - leftImgH) / 2;
+                const posterImg = data.posterUrl ? await loadImage(data.posterUrl, true) : null;
+                if (posterImg) {
+                    ctx.save();
+                    roundRect(ctx, leftImgX, leftImgY, leftImgW, leftImgH, 20);
+                    ctx.clip();
+                    const iw = posterImg.width;
+                    const ih = posterImg.height;
+                    const scale = Math.max(leftImgW / iw, leftImgH / ih);
+                    const srcW = leftImgW / scale;
+                    const srcH = leftImgH / scale;
+                    const srcX = (iw - srcW) / 2;
+                    const srcY = (ih - srcH) / 2;
+                    ctx.drawImage(posterImg, srcX, srcY, srcW, srcH, leftImgX, leftImgY, leftImgW, leftImgH);
+                    ctx.restore();
+                } else {
+                    ctx.fillStyle = '#e8e0d0';
+                    roundRect(ctx, leftImgX, leftImgY, leftImgW, leftImgH, 20);
+                    ctx.fill();
+                }
+
+                const rightSectionX = ticketX + leftSectionW + 40;
+                const rightSectionW = ticketW - leftSectionW - 80;
+                const rightSectionCenterX = rightSectionX + rightSectionW / 2 - 40;
+                ctx.fillStyle = '#ba3b3b';
+                ctx.font = 'bold 34px "League Spartan", Arial, sans-serif';
+                ctx.textAlign = 'center';
+                const titleLines = wrapText(ctx, data.title || '', rightSectionW);
+                let titleY = ticketY + 95;
+                titleLines.forEach(line => {
+                    ctx.fillText(line, rightSectionCenterX, titleY);
+                    titleY += 44;
+                });
+                if (data.director) {
+                    ctx.fillStyle = '#000';
+                    ctx.font = '28px "Open Sans", Arial, sans-serif';
+                    ctx.fillText(`Dirigido por ${data.director}`, rightSectionCenterX, titleY + 8);
+                    titleY += 40;
+                }
+                if (data.genre) {
+                    ctx.fillStyle = '#000';
+                    ctx.font = '28px "Open Sans", Arial, sans-serif';
+                    ctx.fillText(data.genre, rightSectionCenterX, titleY + 8);
+                    titleY += 40;
+                }
+                if (data.rate != null && data.rate >= 1 && data.rate <= 5) {
+                    const r = parseFloat(data.rate);
+                    const full = Math.floor(r);
+                    const hasHalf = (r % 1) >= 0.2;
+                    const clapperboards = '🎬'.repeat(full) + (hasHalf ? '½' : '');
+                    const numStr = r.toFixed(1).replace('.', ',');
+                    ctx.fillStyle = '#000';
+                    ctx.font = '28px "Open Sans", Arial, sans-serif';
+                    ctx.fillText(`Nota: ${clapperboards} (${numStr}/5)`, rightSectionCenterX, titleY + 8);
+                    titleY += 40;
+                }
+
+                const excerptX = 60;
+                const excerptY = 590;
+                const excerptW = 960;
+                const excerptH = 400;
+                ctx.fillStyle = '#f0e6d6';
+                roundRect(ctx, excerptX, excerptY, excerptW, excerptH, 16);
+                ctx.fill();
+                ctx.fillStyle = '#333';
+                ctx.font = '28px "Open Sans", Arial, sans-serif';
+                ctx.textAlign = 'left';
+                const excerptMaxWidth = excerptW - 80;
+                const excerptLines = wrapText(ctx, data.text || '', excerptMaxWidth);
+                let textY = excerptY + 50;
+                const lineHeight = 44;
+                const maxLines = 7;
+                const displayLines = excerptLines.slice(0, maxLines);
+                const hasMore = excerptLines.length > maxLines;
+                displayLines.forEach((line, i) => {
+                    if (textY + lineHeight <= excerptY + excerptH - 30) {
+                        let textToDraw = line;
+                        if (hasMore && i === displayLines.length - 1) {
+                            const ellipsis = '...';
+                            while (ctx.measureText(textToDraw + ellipsis).width > excerptMaxWidth && textToDraw.length > 0) {
+                                textToDraw = textToDraw.slice(0, -1);
+                            }
+                            textToDraw = textToDraw.trim() + ellipsis;
+                        }
+                        ctx.fillText(textToDraw, excerptX + 40, textY);
+                        textY += lineHeight;
+                    }
+                });
+
+                const footerY = 1280;
+                const photoR = 90;
+                const photoX = 150;
+                const photoCx = photoX + photoR;
+                const photoCy = footerY;
+                const photoY = photoCy - photoR;
+                let authorImg = null;
+                if (data.authorPhotoUrl) {
+                    authorImg = await loadImage(data.authorPhotoUrl, true);
+                }
+                if (authorImg) {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(photoCx, photoCy, photoR, 0, Math.PI * 2);
+                    ctx.closePath();
+                    ctx.clip();
+                    const iw = authorImg.width;
+                    const ih = authorImg.height;
+                    const size = Math.min(iw, ih);
+                    let sx, sy;
+                    if (ih >= iw) {
+                        sx = 0;
+                        sy = Math.max(0, (ih - iw) * 0.15);
+                    } else {
+                        sx = (iw - ih) / 2;
+                        sy = 0;
+                    }
+                    ctx.drawImage(authorImg, sx, sy, size, size, photoX, photoY, photoR * 2, photoR * 2);
+                    ctx.restore();
+                } else {
+                    ctx.fillStyle = '#e8e0d0';
+                    ctx.beginPath();
+                    ctx.arc(photoCx, photoCy, photoR, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.strokeStyle = '#f0e6d6';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(photoCx, photoCy, photoR, 0, Math.PI * 2);
+                ctx.stroke();
+
+                const textX = 500;
+                const authorBlockW = W - textX - 60;
+                const authorBlockCenterX = textX + authorBlockW / 2;
+                ctx.textBaseline = 'alphabetic';
+                ctx.fillStyle = '#f0e6d6';
+                ctx.font = '32px "Open Sans", Arial, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('Escrita por', authorBlockCenterX, photoCy - 45);
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 53px "League Spartan", Arial, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(data.authorName || 'Autor', authorBlockCenterX, photoCy + 35);
+
+                if (data.convite) {
+                    const conviteBoxH = 70;
+                    const conviteBoxY = H - conviteBoxH - 40;
+                    ctx.fillStyle = '#f0e6d6';
+                    roundRect(ctx, excerptX, conviteBoxY, excerptW, conviteBoxH, 16);
+                    ctx.fill();
+                    ctx.fillStyle = '#333';
+                    ctx.font = '28px "Open Sans", Arial, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`A convite de ${data.convite}`, W / 2, conviteBoxY + 48);
+                }
+            };
+
+            const roundRect = (ctx, x, y, w, h, r) => {
+                ctx.beginPath();
+                ctx.moveTo(x + r, y);
+                ctx.lineTo(x + w - r, y);
+                ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+                ctx.lineTo(x + w, y + h - r);
+                ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                ctx.lineTo(x + r, y + h);
+                ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+                ctx.lineTo(x, y + r);
+                ctx.quadraticCurveTo(x, y, x + r, y);
+                ctx.closePath();
+            };
+
+            const handleDownloadStory = () => {
+                const canvas = storyCanvasRef.current;
+                if (!canvas || !canvas.width) return;
+                try {
+                    const link = document.createElement('a');
+                    link.download = `critica-story-${Date.now()}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                } catch (err) {
+                    console.error('Erro ao gerar imagem:', err);
+                }
+            };
+
+            const handleCopy = async () => {
+                if (!lastCreatedCritic) return;
+                const textToCopy = `${lastCreatedCritic.title}\n${lastCreatedCritic.url}`;
+                try {
+                    await navigator.clipboard.writeText(textToCopy);
+                    setCopyStatus('Copiado!');
+                    setTimeout(() => setCopyStatus(''), 2000);
+                } catch (err) {
+                    console.error('Erro ao copiar:', err);
+                    setCopyStatus('Não foi possível copiar. Copie manualmente.');
+                }
+            };
+
+            const stripHtml = (html) => {
+                if (!html) return '';
+                const tmp = document.createElement('div');
+                tmp.innerHTML = html;
+                return (tmp.textContent || tmp.innerText || '').trim();
+            };
+
+            const storyData = postType === 'critics' && (lastCreatedCritic || (editingId && formData.title)) ? (
+                (editingId && formData.title) ? (() => {
+                    const writer = writers.find(w => w.id === parseInt(formData.writer_id));
+                    const conviteFont = fonts.find(f => f.id === parseInt(formData.convite_id));
+                    const htmlContent = window.tinymce && window.tinymce.get('text') ? window.tinymce.get('text').getContent() : formData.text;
+                    return {
+                        title: formData.title,
+                        text: stripHtml(htmlContent),
+                        authorName: writer ? writer.name : '',
+                        authorPhotoUrl: writer ? writer.photo_url : '',
+                        convite: conviteFont ? conviteFont.name : '',
+                        rate: formData.rate ? parseFloat(formData.rate) : null
+                    };
+                })() : lastCreatedCritic
+            ) : null;
+
+            // Buscar diretor e pôster quando o story dialog abrir
+            useEffect(() => {
+                if (showStoryDialog && storyData?.title) {
+                    setMovieInfo(null);
+                    fetchMovieInfo(storyData.title).then(setMovieInfo);
+                } else {
+                    setMovieInfo(null);
+                }
+            }, [showStoryDialog, storyData?.title]);
+
+            useEffect(() => {
+                if (showStoryDialog && storyData && storyCanvasRef.current) {
+                    drawStoryToCanvas(storyCanvasRef.current, {
+                        ...storyData,
+                        director: movieInfo?.director,
+                        posterUrl: movieInfo?.posterUrl,
+                        genre: movieInfo?.genre
+                    });
+                }
+            }, [showStoryDialog, storyData, movieInfo]);
+
+            return (
+                <div className="post-form-container">
+                    <div className="header-section">
+                        <img src="logo.png" alt="Quatro Takes" className="logo" />
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+                            <h1>{editingId ? 'Editar' : 'Nova'} {postType === 'critics' ? 'Crítica' : 'Novidade'}</h1>
+                            {postType === 'critics' && (
+                                <button
+                                    type="button"
+                                    onClick={handleOpenCriticsDialog}
+                                    style={{
+                                        padding: '10px 20px',
+                                        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                        color: '#f0eadd',
+                                        border: '2px solid rgba(255, 255, 255, 0.3)',
+                                        borderRadius: '8px',
+                                        cursor: 'pointer',
+                                        fontFamily: '\'League Spartan\', Arial, sans-serif',
+                                        fontWeight: '600',
+                                        fontSize: '14px',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.05em',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+                                        e.target.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                                        e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                                    }}
+                                >
+                                    Ver Críticas
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                    
+                    {message && (
+                        <div className={`message ${message.includes('sucesso') ? 'success' : 'error'}`}>
+                            {message}
+                        </div>
+                    )}
+
+                    {editingId && (
+                        <div
+                            style={{
+                                backgroundColor: '#fff3cd',
+                                border: '1px solid #ffc107',
+                                borderRadius: '8px',
+                                padding: '12px 16px',
+                                marginBottom: '20px',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center'
+                            }}
+                        >
+                            <span style={{ color: '#856404', fontWeight: '500' }}>
+                                Você está editando uma crítica existente.
+                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowStoryDialog(true)}
+                                    style={{
+                                        padding: '8px 16px',
+                                        backgroundColor: '#111827',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        cursor: 'pointer',
+                                        fontFamily: '\'League Spartan\', Arial, sans-serif',
+                                        fontWeight: '600',
+                                        fontSize: '12px',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.05em'
+                                    }}
+                                >
+                                    Story
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                    setEditingId(null);
+                                    setFormData({
+                                        title: '',
+                                        text: '',
+                                        writer_id: '',
+                                        rate: '',
+                                        tag: '',
+                                        font_id: '',
+                                        seen_at: '',
+                                        convite_id: ''
+                                    });
+                                    if (window.tinymce && window.tinymce.get('text')) {
+                                        window.tinymce.get('text').setContent('');
+                                    }
+                                    setMessage('');
+                                }}
+                                style={{
+                                    padding: '8px 16px',
+                                    backgroundColor: '#6b7280',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '6px',
+                                    cursor: 'pointer',
+                                    fontFamily: '\'League Spartan\', Arial, sans-serif',
+                                    fontWeight: '600',
+                                    fontSize: '12px',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.05em'
+                                }}
+                            >
+                                Cancelar Edição
+                            </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {postType === 'critics' && lastCreatedCritic && (
+                        <div
+                            style={{
+                                backgroundColor: '#fff',
+                                border: '1px solid #d1d5db',
+                                borderRadius: '8px',
+                                padding: '16px',
+                                marginBottom: '20px',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                            }}
+                        >
+                            <p style={{ margin: '0 0 12px 0', fontFamily: '\'League Spartan\', Arial, sans-serif', fontWeight: '600', color: '#111' }}>
+                                {lastCreatedCritic.title}
+                            </p>
+                            <a
+                                href={lastCreatedCritic.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ wordBreak: 'break-all', color: '#2563eb', textDecoration: 'underline' }}
+                            >
+                                {lastCreatedCritic.url}
+                            </a>
+                            <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                                <button
+                                    type="button"
+                                    onClick={handleCopy}
+                                    style={{
+                                        padding: '10px 16px',
+                                        backgroundColor: '#111827',
+                                        color: '#f9fafb',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        cursor: 'pointer',
+                                        fontFamily: '\'League Spartan\', Arial, sans-serif',
+                                        fontWeight: '600',
+                                        letterSpacing: '0.05em',
+                                        textTransform: 'uppercase'
+                                    }}
+                                >
+                                    Copiar dados
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowStoryDialog(true)}
+                                    style={{
+                                        padding: '10px 16px',
+                                        backgroundColor: '#111827',
+                                        color: '#f9fafb',
+                                        border: 'none',
+                                        borderRadius: '6px',
+                                        cursor: 'pointer',
+                                        fontFamily: '\'League Spartan\', Arial, sans-serif',
+                                        fontWeight: '600',
+                                        letterSpacing: '0.05em',
+                                        textTransform: 'uppercase'
+                                    }}
+                                >
+                                    Story
+                                </button>
+                                {copyStatus && (
+                                    <span style={{ fontSize: '14px', color: copyStatus === 'Copiado!' ? '#16a34a' : '#dc2626' }}>
+                                        {copyStatus}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    <form onSubmit={handleSubmit} className="post-form">
+                        <div className="form-group">
+                            <label htmlFor="postType">Tipo de Postagem *</label>
+                            <select
+                                id="postType"
+                                name="postType"
+                                value={postType}
+                                onChange={handlePostTypeChange}
+                                required
+                                style={{marginBottom: '20px'}}
+                            >
+                                <option value="critics">Crítica</option>
+                                <option value="news">Novidade</option>
+                            </select>
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="title">Título *</label>
+                            <input
+                                type="text"
+                                id="title"
+                                name="title"
+                                value={formData.title}
+                                onChange={handleInputChange}
+                                placeholder="Digite o título da postagem"
+                                required
+                            />
+                        </div>
+
+                        {postType === 'critics' && (
+                            <div className="form-group">
+                                <label htmlFor="writer_id">Escritor *</label>
+                                <select
+                                    id="writer_id"
+                                    name="writer_id"
+                                    value={formData.writer_id}
+                                    onChange={handleInputChange}
+                                    required
+                                >
+                                    <option value="">Selecione um escritor</option>
+                                    {writers.map(writer => (
+                                        <option key={writer.id} value={writer.id}>
+                                            {writer.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
+                        {postType === 'critics' && (
+                            <div className="form-group">
+                                <label htmlFor="tag">Tag *</label>
+                                <select
+                                    id="tag"
+                                    name="tag"
+                                    value={formData.tag}
+                                    onChange={handleInputChange}
+                                    required
+                                >
+                                    <option value="">Selecione uma tag</option>
+                                    {tags.map(tag => (
+                                        <option key={tag.id} value={tag.id}>
+                                            {tag.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
+                        {postType === 'critics' && (
+                            <div className="form-group">
+                                <label htmlFor="rate">Nota (1-5) *</label>
+                                <input
+                                    type="number"
+                                    id="rate"
+                                    name="rate"
+                                    min="1"
+                                    max="5"
+                                    step="0.5"
+                                    value={formData.rate}
+                                    onChange={handleInputChange}
+                                    placeholder="Digite uma nota de 1 a 5 (ex: 4.5)"
+                                    required
+                                />
+                            </div>
+                        )}
+
+                        {postType === 'news' && (
+                            <div className="form-group">
+                                <label htmlFor="font_id">Fonte *</label>
+                                <select
+                                    id="font_id"
+                                    name="font_id"
+                                    value={formData.font_id}
+                                    onChange={handleInputChange}
+                                    required
+                                >
+                                    <option value="">Selecione uma fonte</option>
+                                    {fonts.map(font => (
+                                        <option key={font.id} value={font.id}>
+                                            {font.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
+                        {postType === 'critics' && (
+                            <div className="form-group">
+                                <label htmlFor="convite_id">Convite</label>
+                                <select
+                                    id="convite_id"
+                                    name="convite_id"
+                                    value={formData.convite_id}
+                                    onChange={handleInputChange}
+                                >
+                                    <option value="">Selecione um convite</option>
+                                    {fonts.map(font => (
+                                        <option key={font.id} value={font.id}>
+                                            {font.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <small style={{color: '#6b7280', fontSize: '12px', marginTop: '4px', display: 'block'}}>
+                                    Usado apenas no Story (não é salvo)
+                                </small>
+                            </div>
+                        )}
+
+                        {postType === 'critics' && (
+                            <div className="form-group">
+                                <label htmlFor="seen_at">Data em que o filme foi visto</label>
+                                <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
+                                    <input
+                                        type="datetime-local"
+                                        id="seen_at"
+                                        name="seen_at"
+                                        value={formData.seen_at}
+                                        onChange={handleInputChange}
+                                        style={{flex: 1}}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData(prev => ({
+                                            ...prev,
+                                            seen_at: getLocalDateTimeInputValue()
+                                        }))}
+                                        style={{
+                                            padding: '8px 12px',
+                                            backgroundColor: '#f3f4f6',
+                                            border: '1px solid #d1d5db',
+                                            borderRadius: '6px',
+                                            cursor: 'pointer',
+                                            fontSize: '12px',
+                                            whiteSpace: 'nowrap'
+                                        }}
+                                    >
+                                        Agora
+                                    </button>
+                                </div>
+                                <small style={{color: '#6b7280', fontSize: '12px', marginTop: '4px', display: 'block'}}>
+                                    Deixe em branco para usar a data atual, ou defina uma data específica
+                                </small>
+                            </div>
+                        )}
+
+                        <div className="form-group">
+                            <label htmlFor="text">Conteúdo *</label>
+                            <textarea
+                                id="text"
+                                name="text"
+                                placeholder="Digite o conteúdo da postagem"
+                                rows="10"
+                                style={{
+                                    width: '100%',
+                                    padding: '12px 16px',
+                                    border: '2px solid #e1e5e9',
+                                    borderRadius: '8px',
+                                    fontSize: '16px',
+                                    fontFamily: 'inherit',
+                                    resize: 'vertical',
+                                    boxSizing: 'border-box'
+                                }}
+                            />
+                        </div>
+
+                        <button 
+                            type="submit" 
+                            className="submit-button"
+                            disabled={loading}
+                        >
+                            {loading ? 'Salvando...' : editingId ? 'Salvar Alterações' : 'Criar Postagem'}
+                        </button>
+                    </form>
+
+                    {/* Dialog de Lista de Críticas */}
+                    {showCriticsDialog && (
+                        <div className="dialog-overlay" onClick={() => setShowCriticsDialog(false)}>
+                            <div className="dialog-content" onClick={(e) => e.stopPropagation()}>
+                                <div className="dialog-header">
+                                    <h2>Selecione uma Crítica para Editar</h2>
+                                    <button
+                                        type="button"
+                                        className="dialog-close"
+                                        onClick={() => setShowCriticsDialog(false)}
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                                <div className="dialog-body">
+                                    {loadingCritics ? (
+                                        <div style={{ textAlign: 'center', padding: '40px' }}>
+                                            <p>Carregando críticas...</p>
+                                        </div>
+                                    ) : criticsList.length === 0 ? (
+                                        <div style={{ textAlign: 'center', padding: '40px' }}>
+                                            <p>Nenhuma crítica encontrada.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="critics-list">
+                                            {criticsList.map(critic => {
+                                                const writer = writers.find(w => w.id === critic.writer_id);
+                                                const tagObj = tags.find(t => t.id === critic.tag);
+                                                const rateDisplay = critic.rate ? (critic.rate / 2).toFixed(1) : '-';
+                                                const date = critic.created_at ? new Date(critic.created_at).toLocaleDateString('pt-BR') : '-';
+                                                
+                                                return (
+                                                    <div
+                                                        key={critic.id}
+                                                        className="critic-item"
+                                                        onClick={() => handleSelectCritic(critic.id)}
+                                                    >
+                                                        <div className="critic-item-header">
+                                                            <h3>{critic.title || 'Sem título'}</h3>
+                                                            <span className="critic-date">{date}</span>
+                                                        </div>
+                                                        <div className="critic-item-meta">
+                                                            {writer && <span className="critic-meta">Escritor: {writer.name}</span>}
+                                                            {tagObj && <span className="critic-meta">Tag: {tagObj.name}</span>}
+                                                            <span className="critic-meta">Nota: {rateDisplay}</span>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Dialog Story */}
+                    {showStoryDialog && storyData && (
+                        <div className="story-dialog-overlay" onClick={() => setShowStoryDialog(false)}>
+                            <button
+                                type="button"
+                                className="story-download-btn"
+                                onClick={(e) => { e.stopPropagation(); handleDownloadStory(); }}
+                                aria-label="Baixar imagem"
+                            >
+                                Download
+                            </button>
+                            <div className="story-dialog-wrapper" onClick={(e) => e.stopPropagation()}>
+                                <canvas
+                                    ref={storyCanvasRef}
+                                    width={1080}
+                                    height={1920}
+                                    style={{ display: 'block', background: '#c13d3d' }}
+                                />
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        function App() {
+            return <PostForm />;
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+
+        // Live reload - recarregar página quando arquivos mudarem
+        const eventSource = new EventSource('/reload');
+        eventSource.onmessage = function(event) {
+            if (event.data === 'reload') {
+                console.log('🔄 Recarregando página...');
+                window.location.reload();
+            }
+        };
+    </script>
+</body>
+</html>
