@@ -482,6 +482,159 @@
             font-size: 43px;
             font-weight: bold;
         }
+
+        /* Sorteador */
+        .sorteador-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .sorteador-header {
+            position: relative;
+            text-align: center;
+            margin-bottom: 40px;
+            background: #ba3b3b;
+            margin: -20px -20px 40px -20px;
+            padding: 30px 20px;
+            border-radius: 0 0 12px 12px;
+        }
+        .sorteador-form {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e1e5e9;
+            border-top: 4px solid #ba3b3b;
+        }
+        .eggs-stage {
+            min-height: 60vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+        .eggs-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin: 40px 0;
+        }
+        .egg-wrapper {
+            position: relative;
+            transition: transform 0.3s ease;
+            cursor: default;
+        }
+        .egg-wrapper.shaking {
+            animation: egg-shake 0.4s ease-in-out infinite;
+        }
+        .egg-wrapper.selected {
+            animation: egg-pop 0.5s ease forwards;
+            transform: scale(1.15);
+        }
+        @keyframes egg-shake {
+            0%, 100% { transform: rotate(-2deg); }
+            50% { transform: rotate(2deg); }
+        }
+        @keyframes egg-pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1.15); }
+        }
+        .egg-item {
+            width: 100px;
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            position: relative;
+        }
+        .egg-item img {
+            width: 80px;
+            height: 100px;
+            object-fit: contain;
+        }
+        .egg-name {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+            max-width: 90px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .egg-name.hidden {
+            visibility: hidden;
+        }
+        .sorteador-container.shaking {
+            animation: screen-shake 0.12s ease-in-out infinite;
+        }
+        @keyframes screen-shake {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(-6px, -3px); }
+            75% { transform: translate(6px, 3px); }
+        }
+        .dino-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .dino-emoji {
+            font-size: 320px;
+            animation: dino-stomp 0.5s ease-in-out infinite;
+        }
+        @keyframes dino-stomp {
+            0%, 100% { transform: scale(1) translateY(0); }
+            50% { transform: scale(1.08) translateY(-8px); }
+        }
+        .dino-picking {
+            color: #ba3b3b;
+            font-family: 'League Spartan', Arial, sans-serif;
+            font-size: 1.2rem;
+            margin-top: 10px;
+        }
+        .egg-wrapper.picking {
+            animation: egg-pulse 0.5s ease-in-out infinite;
+        }
+        @keyframes egg-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(186, 59, 59, 0.5); }
+            50% { box-shadow: 0 0 0 12px rgba(186, 59, 59, 0); }
+        }
+        .results-stage {
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .results-title {
+            font-family: 'League Spartan', Arial, sans-serif;
+            font-size: 2rem;
+            color: #ba3b3b;
+            margin-bottom: 30px;
+        }
+        .results-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        .result-item {
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 12px;
+            font-size: 1.25rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-left: 4px solid #ba3b3b;
+        }
     </style>
 </head>
 <body>
@@ -537,7 +690,7 @@
             return `${datePart}T${normalizedTime}${sign}${offsetHours}:${offsetMins}`;
         };
 
-        function PostForm() {
+        function PostForm({ onOpenSorteador }) {
             const [formData, setFormData] = useState({
                 title: '',
                 text: '',
@@ -546,7 +699,6 @@
                 tag: '',
                 font_id: '',
                 seen_at: '',
-                convite_id: ''
             });
 
             const [postType, setPostType] = useState('critics'); // 'critics' ou 'news'
@@ -599,7 +751,8 @@
                     const genres = await fetchGenreList();
                     const genreNames = genreIds.map((id) => genres.find((g) => g.id === id)?.name).filter(Boolean);
                     const genre = genreNames.length ? genreNames.slice(0, 3).join(', ') : null;
-                    return { director, posterUrl, genre };
+                    const releaseDate = firstResult.release_date || null;
+                    return { director, posterUrl, genre, releaseDate };
                 } catch (err) {
                     console.warn('TMDB: erro ao buscar dados do filme', err);
                     return null;
@@ -700,7 +853,6 @@
                     tag: '',
                     font_id: '',
                     seen_at: '',
-                    convite_id: ''
                 }));
                 setLastCreatedCritic(null);
                 setCopyStatus('');
@@ -764,7 +916,6 @@
                             tag: data.tag ? String(data.tag) : '',
                             font_id: '',
                             seen_at: seenAtLocal,
-                            convite_id: ''
                         });
                         
                         // Preencher TinyMCE
@@ -896,14 +1047,12 @@
                                 return (tmp.textContent || tmp.innerText || '').trim();
                             };
                             const excerpt = stripHtml(critic.text || htmlContent);
-                            const conviteFont = fonts.find(f => f.id === parseInt(formData.convite_id));
                             setLastCreatedCritic({
                                 title: critic.title,
                                 url: `https://quatrotakes.com/criticas?critica=${critic.id}`,
                                 text: excerpt,
                                 authorName: writer ? writer.name : '',
                                 authorPhotoUrl: writer ? writer.photo_url : '',
-                                convite: conviteFont ? conviteFont.name : '',
                                 rate: critic.rate != null ? critic.rate / 2 : null
                             });
                             setCopyStatus('');
@@ -922,7 +1071,6 @@
                         tag: '',
                         font_id: '',
                         seen_at: '',
-                        convite_id: ''
                     });
                     setEditingId(null);
 
@@ -980,15 +1128,17 @@
                 ctx.fillRect(0, 0, W, H);
 
                 ctx.fillStyle = '#fff';
-                ctx.font = 'bold 68px "League Spartan", Arial, sans-serif';
+                ctx.font = 'bold 80px "League Spartan", Arial, sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText('CRÍTICA', W / 2, 160);
+                ctx.fillText('CRÍTICA', W / 2, 200);
 
                 const ticketImg = await loadImage('assets/ticket.png');
-                const ticketX = 60;
-                const ticketY = 220;
-                const ticketW = 960;
-                const ticketH = 340;
+                const marginX = 60;
+                const contentW = W - marginX * 2;
+                const ticketX = marginX;
+                const ticketY = 260;
+                const ticketW = contentW;
+                const ticketH = 400;
                 if (ticketImg) {
                     ctx.drawImage(ticketImg, ticketX, ticketY, ticketW, ticketH);
                 } else {
@@ -997,10 +1147,10 @@
                     ctx.fill();
                 }
 
-                const leftSectionW = 340;
-                const leftImgW = 120;
-                const leftImgH = 160;
-                const leftImgX = ticketX + (leftSectionW - leftImgW) / 2;
+                const leftSectionW = 360;
+                const leftImgW = 140;
+                const leftImgH = 190;
+                const leftImgX = ticketX + (leftSectionW - leftImgW) / 2 - 10;
                 const leftImgY = ticketY + (ticketH - leftImgH) / 2;
                 const posterImg = data.posterUrl ? await loadImage(data.posterUrl, true) : null;
                 if (posterImg) {
@@ -1024,12 +1174,12 @@
 
                 const rightSectionX = ticketX + leftSectionW + 40;
                 const rightSectionW = ticketW - leftSectionW - 80;
-                const rightSectionCenterX = rightSectionX + rightSectionW / 2 - 40;
+                const rightSectionCenterX = rightSectionX + rightSectionW / 2 - 50;
                 ctx.fillStyle = '#ba3b3b';
                 ctx.font = 'bold 34px "League Spartan", Arial, sans-serif';
                 ctx.textAlign = 'center';
                 const titleLines = wrapText(ctx, data.title || '', rightSectionW);
-                let titleY = ticketY + 95;
+                let titleY = ticketY + 115;
                 titleLines.forEach(line => {
                     ctx.fillText(line, rightSectionCenterX, titleY);
                     titleY += 44;
@@ -1058,9 +1208,9 @@
                     titleY += 40;
                 }
 
-                const excerptX = 60;
-                const excerptY = 590;
-                const excerptW = 960;
+                const excerptX = marginX;
+                const excerptY = 690;
+                const excerptW = contentW;
                 const excerptH = 400;
                 ctx.fillStyle = '#f0e6d6';
                 roundRect(ctx, excerptX, excerptY, excerptW, excerptH, 16);
@@ -1070,29 +1220,29 @@
                 ctx.textAlign = 'left';
                 const excerptMaxWidth = excerptW - 80;
                 const excerptLines = wrapText(ctx, data.text || '', excerptMaxWidth);
-                let textY = excerptY + 50;
                 const lineHeight = 44;
                 const maxLines = 7;
                 const displayLines = excerptLines.slice(0, maxLines);
                 const hasMore = excerptLines.length > maxLines;
+                const totalTextHeight = displayLines.length * lineHeight;
+                const fontSize = 28;
+                let textY = excerptY + excerptH / 2 - (displayLines.length - 1) * lineHeight / 2 + fontSize * 0.4;
                 displayLines.forEach((line, i) => {
-                    if (textY + lineHeight <= excerptY + excerptH - 30) {
-                        let textToDraw = line;
-                        if (hasMore && i === displayLines.length - 1) {
-                            const ellipsis = '...';
-                            while (ctx.measureText(textToDraw + ellipsis).width > excerptMaxWidth && textToDraw.length > 0) {
-                                textToDraw = textToDraw.slice(0, -1);
-                            }
-                            textToDraw = textToDraw.trim() + ellipsis;
+                    let textToDraw = line;
+                    if (hasMore && i === displayLines.length - 1) {
+                        const ellipsis = '...';
+                        while (ctx.measureText(textToDraw + ellipsis).width > excerptMaxWidth && textToDraw.length > 0) {
+                            textToDraw = textToDraw.slice(0, -1);
                         }
-                        ctx.fillText(textToDraw, excerptX + 40, textY);
-                        textY += lineHeight;
+                        textToDraw = textToDraw.trim() + ellipsis;
                     }
+                    ctx.fillText(textToDraw, excerptX + 40, textY);
+                    textY += lineHeight;
                 });
 
-                const footerY = 1280;
+                const footerY = 1380;
                 const photoR = 90;
-                const photoX = 150;
+                const photoX = marginX + 50;
                 const photoCx = photoX + photoR;
                 const photoCy = footerY;
                 const photoY = photoCy - photoR;
@@ -1132,7 +1282,7 @@
                 ctx.stroke();
 
                 const textX = 500;
-                const authorBlockW = W - textX - 60;
+                const authorBlockW = W - textX - marginX;
                 const authorBlockCenterX = textX + authorBlockW / 2;
                 ctx.textBaseline = 'alphabetic';
                 ctx.fillStyle = '#f0e6d6';
@@ -1144,16 +1294,24 @@
                 ctx.textAlign = 'center';
                 ctx.fillText(data.authorName || 'Autor', authorBlockCenterX, photoCy + 35);
 
-                if (data.convite) {
-                    const conviteBoxH = 70;
-                    const conviteBoxY = H - conviteBoxH - 40;
+                if (data.releaseDate) {
+                    const releaseBoxH = 70;
+                    const releaseBoxY = H - releaseBoxH - 40;
+                    const releaseDateObj = new Date(data.releaseDate + 'T12:00:00');
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    releaseDateObj.setHours(0, 0, 0, 0);
+                    const meses = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+                    const releaseText = releaseDateObj <= today
+                        ? 'Já disponível nos cinemas'
+                        : `Estreia em ${releaseDateObj.getDate()} de ${meses[releaseDateObj.getMonth()]}`;
                     ctx.fillStyle = '#f0e6d6';
-                    roundRect(ctx, excerptX, conviteBoxY, excerptW, conviteBoxH, 16);
+                    roundRect(ctx, excerptX, releaseBoxY, excerptW, releaseBoxH, 16);
                     ctx.fill();
                     ctx.fillStyle = '#333';
                     ctx.font = '28px "Open Sans", Arial, sans-serif';
                     ctx.textAlign = 'center';
-                    ctx.fillText(`A convite de ${data.convite}`, W / 2, conviteBoxY + 48);
+                    ctx.fillText(releaseText, W / 2, releaseBoxY + 48);
                 }
             };
 
@@ -1207,14 +1365,12 @@
             const storyData = postType === 'critics' && (lastCreatedCritic || (editingId && formData.title)) ? (
                 (editingId && formData.title) ? (() => {
                     const writer = writers.find(w => w.id === parseInt(formData.writer_id));
-                    const conviteFont = fonts.find(f => f.id === parseInt(formData.convite_id));
                     const htmlContent = window.tinymce && window.tinymce.get('text') ? window.tinymce.get('text').getContent() : formData.text;
                     return {
                         title: formData.title,
                         text: stripHtml(htmlContent),
                         authorName: writer ? writer.name : '',
                         authorPhotoUrl: writer ? writer.photo_url : '',
-                        convite: conviteFont ? conviteFont.name : '',
                         rate: formData.rate ? parseFloat(formData.rate) : null
                     };
                 })() : lastCreatedCritic
@@ -1236,7 +1392,8 @@
                         ...storyData,
                         director: movieInfo?.director,
                         posterUrl: movieInfo?.posterUrl,
-                        genre: movieInfo?.genre
+                        genre: movieInfo?.genre,
+                        releaseDate: movieInfo?.releaseDate
                     });
                 }
             }, [showStoryDialog, storyData, movieInfo]);
@@ -1247,6 +1404,34 @@
                         <img src="logo.png" alt="Quatro Takes" className="logo" />
                         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
                             <h1>{editingId ? 'Editar' : 'Nova'} {postType === 'critics' ? 'Crítica' : 'Novidade'}</h1>
+                            <button
+                                type="button"
+                                onClick={onOpenSorteador}
+                                style={{
+                                    padding: '10px 20px',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                    color: '#f0eadd',
+                                    border: '2px solid rgba(255, 255, 255, 0.3)',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    fontFamily: '\'League Spartan\', Arial, sans-serif',
+                                    fontWeight: '600',
+                                    fontSize: '14px',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.05em',
+                                    transition: 'all 0.3s ease'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+                                    e.target.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                                    e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                                }}
+                            >
+                                Sorteador
+                            </button>
                             {postType === 'critics' && (
                                 <button
                                     type="button"
@@ -1333,8 +1518,7 @@
                                         rate: '',
                                         tag: '',
                                         font_id: '',
-                                        seen_at: '',
-                                        convite_id: ''
+                                        seen_at: ''
                                     });
                                     if (window.tinymce && window.tinymce.get('text')) {
                                         window.tinymce.get('text').setContent('');
@@ -1538,28 +1722,6 @@
 
                         {postType === 'critics' && (
                             <div className="form-group">
-                                <label htmlFor="convite_id">Convite</label>
-                                <select
-                                    id="convite_id"
-                                    name="convite_id"
-                                    value={formData.convite_id}
-                                    onChange={handleInputChange}
-                                >
-                                    <option value="">Selecione um convite</option>
-                                    {fonts.map(font => (
-                                        <option key={font.id} value={font.id}>
-                                            {font.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                <small style={{color: '#6b7280', fontSize: '12px', marginTop: '4px', display: 'block'}}>
-                                    Usado apenas no Story (não é salvo)
-                                </small>
-                            </div>
-                        )}
-
-                        {postType === 'critics' && (
-                            <div className="form-group">
                                 <label htmlFor="seen_at">Data em que o filme foi visto</label>
                                 <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
                                     <input
@@ -1705,8 +1867,186 @@
             );
         }
 
+        function shuffleArray(arr) {
+            const a = [...arr];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function Sorteador({ onBack }) {
+            const [namesText, setNamesText] = useState('');
+            const [quantidade, setQuantidade] = useState(1);
+            const [phase, setPhase] = useState('form'); // form | eggs | dino | results
+            const [eggs, setEggs] = useState([]);
+            const [revealedIndices, setRevealedIndices] = useState(new Set());
+            const [currentPick, setCurrentPick] = useState(null);
+            const [sortedNames, setSortedNames] = useState([]);
+
+            const handleSortear = () => {
+                const names = namesText.split(',').map(n => n.trim()).filter(Boolean);
+                if (names.length === 0) {
+                    alert('Digite pelo menos um nome!');
+                    return;
+                }
+                const qty = Math.min(Math.max(1, parseInt(quantidade) || 1), names.length);
+                const shuffled = shuffleArray(names);
+                const toDraw = shuffled.slice(0, qty);
+                setEggs(toDraw);
+                setSortedNames(toDraw);
+                setRevealedIndices(new Set());
+                setPhase('eggs');
+            };
+
+            useEffect(() => {
+                if (phase !== 'eggs') return;
+                const timer = setTimeout(() => {
+                    setPhase('dino');
+                    setCurrentPick(0);
+                }, 800);
+                return () => clearTimeout(timer);
+            }, [phase]);
+
+            useEffect(() => {
+                if (phase !== 'dino' || currentPick === null) return;
+                const pickIdx = currentPick;
+                const timer = setTimeout(() => {
+                    setRevealedIndices(prev => new Set([...prev, pickIdx]));
+                    if (pickIdx < eggs.length - 1) {
+                        setCurrentPick(pickIdx + 1);
+                    } else {
+                        setTimeout(() => {
+                            setPhase('results');
+                            setCurrentPick(null);
+                        }, 600);
+                    }
+                }, 1200);
+                return () => clearTimeout(timer);
+            }, [phase, currentPick, eggs.length]);
+
+            if (phase === 'form') {
+                return (
+                    <div className="sorteador-container">
+                        <div className="sorteador-header">
+                            <button
+                                onClick={onBack}
+                                style={{
+                                    position: 'absolute',
+                                    left: 20,
+                                    top: 30,
+                                    background: 'rgba(255,255,255,0.2)',
+                                    border: '2px solid rgba(255,255,255,0.5)',
+                                    color: '#f0eadd',
+                                    padding: '8px 16px',
+                                    borderRadius: 8,
+                                    cursor: 'pointer',
+                                    fontFamily: "'League Spartan', Arial, sans-serif",
+                                    fontWeight: 600
+                                }}
+                            >
+                                ← Voltar
+                            </button>
+                            <h1 style={{ color: '#f0eadd', fontFamily: "'League Spartan', Arial, sans-serif" }}>Sorteador</h1>
+                            <p style={{ color: 'rgba(240,234,221,0.9)', marginTop: 8 }}>Nomes em ovos de dinossauro</p>
+                        </div>
+                        <div className="sorteador-form">
+                            <div className="form-group">
+                                <label>Nomes (separados por vírgula)</label>
+                                <textarea
+                                    value={namesText}
+                                    onChange={e => setNamesText(e.target.value)}
+                                    placeholder="João, Maria, Pedro, Ana, ..."
+                                    rows={5}
+                                    style={{
+                                        width: '100%',
+                                        padding: 12,
+                                        borderRadius: 8,
+                                        border: '2px solid #e1e5e9',
+                                        fontFamily: 'inherit',
+                                        fontSize: 16,
+                                        boxSizing: 'border-box'
+                                    }}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Quantidade a sortear</label>
+                                <input
+                                    type="number"
+                                    min={1}
+                                    value={quantidade}
+                                    onChange={e => setQuantidade(e.target.value)}
+                                    style={{ maxWidth: 120 }}
+                                />
+                            </div>
+                            <button className="submit-button" onClick={handleSortear}>
+                                Sortear
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (phase === 'eggs' || phase === 'dino') {
+                const isPicking = (idx) => phase === 'dino' && currentPick === idx;
+                return (
+                    <div className={`sorteador-container ${phase === 'dino' ? 'shaking' : ''}`}>
+                        <div className="sorteador-header">
+                            <h1 style={{ color: '#f0eadd', fontFamily: "'League Spartan', Arial, sans-serif" }}>Ovos</h1>
+                        </div>
+                        <div className="eggs-stage">
+                            {phase === 'dino' && (
+                                <div className="dino-area">
+                                    <div className="dino-emoji">🦖</div>
+                                    <div className="dino-picking">O dinossauro está escolhendo um ovo...</div>
+                                </div>
+                            )}
+                            <div className="eggs-grid">
+                                {eggs.map((name, idx) => (
+                                    <div
+                                        key={idx}
+                                        className={`egg-wrapper ${revealedIndices.has(idx) ? 'selected' : ''} ${isPicking(idx) ? 'picking' : ''}`}
+                                    >
+                                        <div className="egg-item">
+                                            <img src="assets/ovo.png" alt="Ovo" />
+                                            <span className={`egg-name ${revealedIndices.has(idx) ? '' : 'hidden'}`}>
+                                                {name}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="sorteador-container">
+                    <div className="sorteador-header">
+                        <h1 style={{ color: '#f0eadd', fontFamily: "'League Spartan', Arial, sans-serif" }}>Sorteados!</h1>
+                    </div>
+                    <div className="results-stage">
+                        <h2 className="results-title">Os sorteados foram:</h2>
+                        <div className="results-list">
+                            {sortedNames.map((name, i) => (
+                                <div key={i} className="result-item">{name}</div>
+                            ))}
+                        </div>
+                        <button className="submit-button" onClick={onBack} style={{ maxWidth: 300, margin: '0 auto' }}>
+                            Finalizar
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
         function App() {
-            return <PostForm />;
+            const [screen, setScreen] = useState('main');
+            return screen === 'main'
+                ? <PostForm onOpenSorteador={() => setScreen('sorteador')} />
+                : <Sorteador onBack={() => setScreen('main')} />;
         }
 
         ReactDOM.render(<App />, document.getElementById('root'));
